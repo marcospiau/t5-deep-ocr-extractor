@@ -1,0 +1,12 @@
+data:
+    sroie:
+        basedir: ./data/sroie_receipt_dataset/
+        ocr_outputs_file: ocr_baseline-aula9.csv
+        train_dir: train
+        test_dir: test
+    doq_vqa_dataset:
+        basedir: ./data/doc_vqa_dataset/
+        train_dir: train
+        val_dir: val
+        test_dir: test
+
