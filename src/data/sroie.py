@@ -4,7 +4,9 @@ from transformers import T5Tokenizer
 from typing import List, Dict
 import glob
 import json
+import numpy as np
 import os
+import pandas as pd
 
 
 # Cuidado com essa função, altera o dict inplace
@@ -35,6 +37,39 @@ def get_all_keynames_from_dir(base_dir: str) -> List[str]:
     all_files = glob.glob(base_dir + '/*')
     keynames = sorted(set([os.path.splitext(x)[0] for x in all_files]))
     return keynames
+
+
+def load_and_parse_google_ocr_output(csv_file, train_files_dir,
+                                     test_files_dir):
+    data = pd.read_csv(csv_file, converters={'ocr_gvision_output': json.loads})
+    data['raw_full_text'] = data['ocr_gvision_output'].map(
+        lambda x: x["fullTextAnnotation"]["text"])
+
+    # could also be used
+    # data['full_json'].map(lambda x: x['textAnnotations'][0]['description'])
+
+    def get_file_ids(path):
+        files = os.listdir(path)
+        files_without_extension = set([x.split('.')[0] for x in files])
+        return files_without_extension
+
+    data['is_on_train_dir'] = data['file_id'].isin(
+        get_file_ids(train_files_dir))
+    data['is_on_test_dir'] = data['file_id'].isin(get_file_ids(test_files_dir))
+
+    # file_id cannot be in train and test at same time
+    assert np.logical_xor(data['is_on_train_dir'],
+                          data['is_on_test_dir']).all()
+
+    # Unique key that identifies an example
+    data['dir'] = data['is_on_train_dir'].map({
+        True: train_files_dir,
+        False: test_files_dir
+    })
+    data['keyname'] = data.apply(
+        lambda x: os.path.join(x['dir'], x['file_id']), axis=1)
+
+    return data.set_index('keyname')
 
 
 class T5BaselineDataset(Dataset):
