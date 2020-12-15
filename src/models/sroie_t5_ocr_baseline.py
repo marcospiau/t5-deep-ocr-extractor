@@ -9,7 +9,7 @@ import random
 import torch
 
 
-class SroieT5OCRBaseline(pl.LightningModule):
+class SROIET5OCRBaseline(pl.LightningModule):
     def __init__(self, hparams):
         super().__init__()
         self.hparams = hparams
