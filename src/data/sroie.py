@@ -42,8 +42,6 @@ def get_all_keynames_from_dir(base_dir: str) -> List[str]:
 def load_and_parse_google_ocr_output(csv_file, train_files_dir,
                                      test_files_dir):
     data = pd.read_csv(csv_file, converters={'ocr_gvision_output': json.loads})
-    data['raw_full_text'] = data['ocr_gvision_output'].map(
-        lambda x: x["fullTextAnnotation"]["text"])
 
     # could also be used
     # data['full_json'].map(lambda x: x['textAnnotations'][0]['description'])
@@ -70,6 +68,19 @@ def load_and_parse_google_ocr_output(csv_file, train_files_dir,
         lambda x: os.path.join(x['dir'], x['file_id']), axis=1)
 
     return data.set_index('keyname')
+
+
+def extract_full_text_annotation(x: Dict[str, str]) -> str:
+    """Extract full text annotation from a single Google Vision OCR output.
+
+    Args:
+        x (Dict[str, str]): whole OCR output.
+
+    Returns:
+        str: string corresponding to the full text portion of OCR output.
+    """
+    raw_full_text = x["fullTextAnnotation"]["text"]
+    return raw_full_text
 
 
 class T5BaselineDataset(Dataset):
@@ -110,7 +121,9 @@ class T5BaselineDataset(Dataset):
         # Keeping only necessary data
         self.ocr_outputs = {
             k: v
-            for k, v in ocr_outputs.items() if k in keynames
+            for k, v in ocr_outputs["ocr_gvision_output"].map(
+                extract_full_text_annotation).to_dict().items()
+            if k in keynames
         }
 
     def __len__(self):
