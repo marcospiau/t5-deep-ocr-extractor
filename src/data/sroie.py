@@ -135,19 +135,26 @@ class T5BaselineDataset(Dataset):
 
         raw_labels_data = load_labels(self.keynames[idx])
         formatted_labels = self.format_labels_fn(raw_labels_data)
-
-        tokenizer_outputs = self.tokenizer.prepare_seq2seq_batch(
-            src_texts=formatted_input,
-            tgt_texts=formatted_labels,
-            max_length=self.max_source_length,
-            max_target_length=self.max_target_length,
+        
+        tokenized_inputs = self.tokenizer.encode_plus(
+            formatted_input,
             return_tensors='pt',
             padding='max_length',
+            truncation='longest_first',
+            max_length=self.max_source_length
+        )
+
+        tokenized_outputs = self.tokenizer.encode_plus(
+            formatted_input,
+            return_tensors='pt',
+            padding='max_length',
+            truncation='longest_first',
+            max_length=self.max_target_length
         )
 
         # Labels with -100 are ignored on CrossEntropyLoss
         # https://github.com/huggingface/transformers/blob/b290195ac78275e048396eabcce396c4cee0975a/src/transformers/models/t5/modeling_t5.py#L1273
-        labels = tokenizer_outputs.labels.squeeze()
+        labels = tokenized_outputs.labels.squeeze()
         labels.masked_fill_(labels == self.tokenizer.pad_token_id, -100)
 
         rets = {
@@ -158,8 +165,8 @@ class T5BaselineDataset(Dataset):
             'keyname': self.keynames[idx],
 
             # tokenizer outputs
-            'input_ids': tokenizer_outputs.input_ids.squeeze(),
-            'attention_mask': tokenizer_outputs.attention_mask.squeeze(),
+            'input_ids': tokenized_inputs.input_ids.squeeze(),
+            'attention_mask': tokenized_inputs.attention_mask.squeeze(),
             'labels': labels
         }
 
