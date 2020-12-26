@@ -145,7 +145,7 @@ class T5BaselineDataset(Dataset):
         )
 
         tokenized_outputs = self.tokenizer.encode_plus(
-            formatted_input,
+            formatted_labels,
             return_tensors='pt',
             padding='max_length',
             truncation='longest_first',
