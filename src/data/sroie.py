@@ -25,7 +25,7 @@ def load_full_ocr(key_path: str) -> dict:
     """Loads full output from Google Vision OCR.
 
     """
-    text_data = json.load(open(f'{key_path}.txt', 'r'))
+    text_data = json.load(open(f'{key_path}.json', 'r'))
     return text_data
 
 
