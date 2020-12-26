@@ -7,6 +7,7 @@ import numpy as np
 import pytorch_lightning as pl
 import random
 import torch
+from io import StringIO
 
 
 class SROIET5OCRBaseline(pl.LightningModule):
@@ -95,19 +96,30 @@ class SROIET5OCRBaseline(pl.LightningModule):
         exact_match_epoch = np.mean(
             self._concat_dict_by_key(outputs, 'exact_match'))
 
-        # Prints a random example
+        # Prints a random example to Neptune Logger
         random_outs = random.choice(outputs)
         idx_sample = random.randint(0,
                                     next(map(len, random_outs.values())) - 1)
         example = {k: v[idx_sample] for k, v in random_outs.items()}
 
-        print(80 * "-" + '\nSample predictions epoch',
-              f" {self.current_epoch} '{prefix}':")
+        buffer = StringIO()
+        print(100 * '-', file=buffer)
+        print('Sample predictions epoch',
+              f" {self.current_epoch} '{prefix}':",
+              file=buffer)
         for k, v in example.items():
             if k in ['precision', 'recall', 'f1', 'exact_match', 'keyname']:
-                print(f'{k}: {v}')
+                print(f'{k}: {v}', file=buffer)
             else:
-                print(f'{k}:\n    {v}')
+                print(f'{k}:\n    {v}', file=buffer)
+
+        print(buffer.getvalue())
+        buffer.seek(0)
+        # if self.logger is not None:
+        #     self.logger.experiment.log_artifact(
+        #         buffer,
+        #         f'example_{prefix}_predictions_epoch={self.current_epoch}.txt'
+        #         )
 
         log_dict = {
             f"{prefix}_precision": precision_epoch,
@@ -115,16 +127,13 @@ class SROIET5OCRBaseline(pl.LightningModule):
             f"{prefix}_f1": f1_epoch,
             f"{prefix}_exact_match": exact_match_epoch
         }
-
-        for k, v in log_dict.items():
-            self.log(k,
-                     v,
-                     prog_bar=True,
-                     on_epoch=True,
-                     on_step=False,
-                     logger=True,
-                     reduce_fx=lambda x: x)
-        # return log_dict
+        self.log_dict(
+            log_dict,
+            prog_bar=True,
+            on_epoch=True,
+            on_step=False,
+            logger=True  # TODO testing
+        )
 
     def training_step(self, batch, batch_idx):
         input_ids = batch['input_ids']
@@ -135,12 +144,18 @@ class SROIET5OCRBaseline(pl.LightningModule):
                        attention_mask=attention_mask,
                        labels=labels,
                        return_dict=True).loss
-        self.log('loss',
-                 loss,
-                 prog_bar=False,
-                 on_epoch=False,
-                 on_step=True,
-                 logger=True)
+        # self.log('loss',
+        #          loss,
+        #          prog_bar=False,
+        #          on_epoch=False,
+        #          on_step=True,
+        #          logger=False) # Nao deixar esse logger=True porque da erro
+
+        if self.logger is not None:
+            self.logger.experiment.log_metric('train_loss_step', loss)
+
+        # Acho que esse aqui vai dar problema, o global_step so aumentar com o grad_batch_accum
+        # self.logger.experiment.log_metric('train_loss_manual_2', self.global_step, loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
