@@ -1,7 +1,7 @@
 from IPython.display import Image as Image_py
 from torch.utils.data import Dataset
 from transformers import T5Tokenizer
-from typing import List, Dict
+from typing import List
 import glob
 import json
 import os
@@ -129,3 +129,22 @@ class T5BaselineDataset(Dataset):
 
         example = self.__getitem__(idx)
         return example
+
+
+def get_default_t5_preprocessing_functions(field_to_extract):
+    """Convenience function for generating preprocessing functions for inputs
+        and labels when using T5 text-to-text.
+
+    For inputs, returns `What is the <x>? <formatted_text>`, where <x> is the
+    field to be extracted and <formatted_text> are the ocr outputs with `\n`
+    replace by blank spaces.
+
+    For the labels, just return the ground truth labels.
+    """
+    def format_labels_fn(x):
+        return x[field_to_extract]
+
+    def format_inputs_fn(x):
+        return f'What is the {field_to_extract}? ' + x.replace('\n', ' ')
+
+    return {'inputs': format_inputs_fn, 'labels': format_labels_fn}
