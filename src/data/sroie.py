@@ -5,7 +5,7 @@ from typing import List, Dict
 import glob
 import json
 import os
-from google_vision_ocr_parsing import extract_full_text_annotation
+from src.data.google_vision_ocr_parsing import extract_full_text_annotation
 
 
 def load_labels(key_path: str) -> dict:
