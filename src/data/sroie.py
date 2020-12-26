@@ -135,7 +135,7 @@ class T5BaselineDataset(Dataset):
 
         raw_labels_data = load_labels(self.keynames[idx])
         formatted_labels = self.format_labels_fn(raw_labels_data)
-        
+
         tokenized_inputs = self.tokenizer.encode_plus(
             formatted_input,
             return_tensors='pt',
@@ -154,7 +154,7 @@ class T5BaselineDataset(Dataset):
 
         # Labels with -100 are ignored on CrossEntropyLoss
         # https://github.com/huggingface/transformers/blob/b290195ac78275e048396eabcce396c4cee0975a/src/transformers/models/t5/modeling_t5.py#L1273
-        labels = tokenized_outputs.labels.squeeze()
+        labels = tokenized_outputs.input_ids.squeeze()
         labels.masked_fill_(labels == self.tokenizer.pad_token_id, -100)
 
         rets = {
