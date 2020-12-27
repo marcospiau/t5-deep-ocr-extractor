@@ -119,7 +119,7 @@ def get_default_preprocessing_functions(field_to_extract):
 
 
 DEFAULT_TASK_FUNCTION_MAPS = {
-    k: get_default_preprocessing_functions(k)
+    'extract_' + k: get_default_preprocessing_functions(k)
     for k in SROIE_FIELDS_TO_EXTRACT
 }
 
