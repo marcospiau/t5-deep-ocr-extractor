@@ -4,13 +4,13 @@ from typing import Dict
 
 
 def get_num_parameters(model: nn.Module) -> Dict[str, int]:
-    """Calcula número de parâmetros de um módulo Pytorch.
+    """Calculates number of parameters in a Pytorch Module.
 
     Args:
-        model (nn.Module): módulo Pytorch
+        model (nn.Module): Pytorch module.
 
     Returns:
-        Dict[str, int]: Número de parâmetros
+        Dict[str, int]: with both total number of parameters and trainable.
     """
 
     sizes = np.array([p.numel() for p in model.parameters()])
