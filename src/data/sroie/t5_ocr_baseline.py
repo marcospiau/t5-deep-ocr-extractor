@@ -1,6 +1,6 @@
 from IPython.display import Image as Image_py
 from src.data.google_vision_ocr_parsing import extract_full_text_annotation
-from src.data.sroie.sroie_common import load_full_ocr, load_labels
+from src.data.sroie import load_full_ocr, load_labels
 from torch.utils.data import Dataset, ConcatDataset
 from transformers import T5Tokenizer
 from typing import List, Dict, Union
