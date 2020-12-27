@@ -179,21 +179,3 @@ class T5OCRBaseline(pl.LightningModule):
     def test_epoch_end(self, outputs):
         self._base_eval_epoch_end(outputs, 'test')
         # return output
-
-    # nao da pra usar isso aqui e mostrar help
-
-
-#    @staticmethod
-#    def add_model_specific_args(parent_parser):
-#        parser = ArgumentParser(parents=[parent_parser], add_help=False)
-#        parser.add_argument('--t5_model_prefix', type=str, default=None)
-#        parser.add_argument('--t5_tokenizer_prefix',
-#                            type=str,
-#                            default='t5-small')
-#        parser.add_argument('--generate_max_length', type=int, default=512)
-#        parser.add_argument('--optimizer',
-#                            type=str,
-#                            default='adafactor',
-#                            choices=['adafactor', 'adam'])
-#        parser.add_argument('--learning_rate', type=float, default=1e-3)
-#        return parser
