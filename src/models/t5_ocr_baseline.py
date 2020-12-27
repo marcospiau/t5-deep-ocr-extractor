@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from fairseq.optim.adafactor import Adafactor
+from io import StringIO
 from src.metrics import compute_exact, compute_precision_recall_f1
 from transformers import T5ForConditionalGeneration
 from transformers import T5Tokenizer
@@ -7,18 +8,23 @@ import numpy as np
 import pytorch_lightning as pl
 import random
 import torch
-from io import StringIO
 
 
 class T5OCRBaseline(pl.LightningModule):
-    def __init__(self, hparams):
+    def __init__(self, t5_model_prefix: str, t5_tokenizer_prefix: str,
+                 learning_rate: float, optimizer: str,
+                 generate_max_length: int):
         super().__init__()
-        self.hparams = hparams
-        self.t5 = T5ForConditionalGeneration.from_pretrained(
-            self.hparams.t5_prefix)
 
-        self.tokenizer = T5Tokenizer.from_pretrained(
-            self.hparams.t5_tokenizer_prefix)
+        self.t5_model_prefix = t5_model_prefix
+        self.t5_tokenizer_prefix = t5_tokenizer_prefix
+        self.optimizer = optimizer
+        self.learning_rate = learning_rate
+        self.generate_max_length = generate_max_length
+        self.t5 = T5ForConditionalGeneration.from_pretrained(t5_model_prefix)
+        self.tokenizer = T5Tokenizer.from_pretrained(t5_tokenizer_prefix)
+
+        self.save_hyperparameters()
 
     def decode_token_ids(self, token_ids):
         """Decodes token_ids into text.
@@ -30,19 +36,20 @@ class T5OCRBaseline(pl.LightningModule):
         return decoded_text
 
     def configure_optimizers(self):
-        if self.hparams.optmizer == 'adam':
+        if self.optimizer == 'adam':
             optimizer = torch.optim.Adam(
                 [p for p in self.parameters() if p.requires_grad],
-                lr=self.hparams.learning_rate,
+                lr=self.learning_rate,
                 eps=1e-08)
-        elif self.hparams.optmizer == 'adafactor':
+        elif self.optimizer == 'adafactor':
             # https://discuss.huggingface.co/t/t5-finetuning-tips/684
             optimizer = Adafactor(
                 [p for p in self.parameters() if p.requires_grad],
                 scale_parameter=False,
                 relative_step=False,
-                lr=self.hparams.learning_rate)
-
+                lr=self.learning_rate)
+        else:
+            raise ValueError("Optimizer must be `adafactor` or `adam`")
         return optimizer
 
     @torch.no_grad()
@@ -56,7 +63,7 @@ class T5OCRBaseline(pl.LightningModule):
         generated_tokens = self.t5.generate(
             input_ids=input_ids,
             # attention_mask = attention_mask,
-            **self.hparams.t5_generate_kwargs)
+            max_length=self.generate_max_length)
         generated_text = self.decode_token_ids(generated_tokens)
 
         # Compute metrics
@@ -82,13 +89,11 @@ class T5OCRBaseline(pl.LightningModule):
         ])
         return rets
 
-    # Israel faz algo parecido
     def _concat_dict_by_key(self, x, key):
         return sum([x[key] for x in x], [])
 
     def _base_eval_epoch_end(self, outputs, prefix):
         # Reducing metrics over epoch by mean
-        # Não usei o log do lightning porque não sei o que ele faz no final
         precision_epoch = np.mean(
             self._concat_dict_by_key(outputs, 'precision'))
         recall_epoch = np.mean(self._concat_dict_by_key(outputs, 'recall'))
@@ -154,8 +159,10 @@ class T5OCRBaseline(pl.LightningModule):
         if self.logger is not None:
             self.logger.experiment.log_metric('train_loss_step', loss)
 
-        # Acho que esse aqui vai dar problema, o global_step so aumentar com o grad_batch_accum
-        # self.logger.experiment.log_metric('train_loss_manual_2', self.global_step, loss)
+        # Acho que esse aqui vai dar problema o global_step so aumentar com
+        # o grad_batch_accum
+        # self.logger.experiment.log_metric('train_loss_manual_2',
+        #         self.global_step, loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -172,3 +179,21 @@ class T5OCRBaseline(pl.LightningModule):
     def test_epoch_end(self, outputs):
         self._base_eval_epoch_end(outputs, 'test')
         # return output
+
+    # nao da pra usar isso aqui e mostrar help
+
+
+#    @staticmethod
+#    def add_model_specific_args(parent_parser):
+#        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+#        parser.add_argument('--t5_model_prefix', type=str, default=None)
+#        parser.add_argument('--t5_tokenizer_prefix',
+#                            type=str,
+#                            default='t5-small')
+#        parser.add_argument('--generate_max_length', type=int, default=512)
+#        parser.add_argument('--optimizer',
+#                            type=str,
+#                            default='adafactor',
+#                            choices=['adafactor', 'adam'])
+#        parser.add_argument('--learning_rate', type=float, default=1e-3)
+#        return parser
