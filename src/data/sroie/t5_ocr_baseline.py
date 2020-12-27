@@ -1,9 +1,10 @@
 from IPython.display import Image as Image_py
 from src.data.google_vision_ocr_parsing import extract_full_text_annotation
 from src.data.sroie.sroie_common import load_full_ocr, load_labels
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, ConcatDataset
 from transformers import T5Tokenizer
-from typing import List
+from typing import List, Dict, Union
+from src.data.sroie import SROIE_FIELDS_TO_EXTRACT
 
 
 class T5BaselineDataset(Dataset):
@@ -98,7 +99,7 @@ class T5BaselineDataset(Dataset):
         return example
 
 
-def get_default_t5_preprocessing_functions(field_to_extract):
+def get_default_preprocessing_functions(field_to_extract):
     """Convenience function for generating preprocessing functions for inputs
         and labels when using T5 text-to-text.
 
@@ -115,3 +116,50 @@ def get_default_t5_preprocessing_functions(field_to_extract):
         return f'What is the {field_to_extract}? ' + x.replace('\n', ' ')
 
     return {'inputs': format_inputs_fn, 'labels': format_labels_fn}
+
+
+DEFAULT_TASK_FUNCTION_MAPS = {
+    k: get_default_preprocessing_functions(k)
+    for k in SROIE_FIELDS_TO_EXTRACT
+}
+
+
+def get_datasets_dict_from_task_functions_map(
+        keynames: List[str],
+        tasks_functions_maps: [List[Dict[str, callable]]
+                               ] = DEFAULT_TASK_FUNCTION_MAPS,
+        t5_prefix: str = 't5-small',
+        max_source_length: Union[int, None] = 512,
+        max_target_length: Union[int, None] = 64) -> Dict[str, Dataset]:
+    """Return dict with datasets for each individual task and one dataset with
+        all tasks concatenated.
+
+    Args:
+        keynames (List[str]): keynames (paths without extension) for receipts
+            on SROIE dataset.
+        t5_prefix (str, optional): prefix identifying the chosen t5 model.
+            Will be used to instantiate the tokenzier. Defaults to 't5-small'.
+        max_source_length (Union[int, None], optional): Length of input token
+            sequences. Size is enforced with truncation or padding. Defaults to
+                64; None means size for model (512 for default
+                HuggingFace's T5 configs.
+        max_target_length (Union[int, None], optional): length of labels token
+            sequences. Defaults to 64. The observations in `max_source_length`
+            parameter are valid here too.
+
+    Returns:
+        Dict[str, Dataset]: dataset for each task.
+    """
+    # Dataset for each task
+    datasets = {
+        k: T5BaselineDataset(keynames=keynames,
+                             format_labels_fn=v['labels'],
+                             format_inputs_fn=v['inputs'],
+                             t5_tokenizer_prefix=t5_prefix,
+                             max_source_length=max_source_length,
+                             max_target_length=max_target_length)
+        for k, v in tasks_functions_maps.items()
+    }
+    # dataset with all tasks
+    datasets['all_tasks_concat'] = ConcatDataset(datasets.values())
+    return datasets
