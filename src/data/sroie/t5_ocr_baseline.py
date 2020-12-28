@@ -4,7 +4,7 @@ from src.data.sroie import load_full_ocr, load_labels
 from torch.utils.data import Dataset, ConcatDataset
 from transformers import T5Tokenizer
 from typing import List, Dict, Union
-from src.data.sroie import SROIE_FIELDS_TO_EXTRACT
+import gin
 
 
 class T5BaselineDataset(Dataset):
@@ -12,24 +12,18 @@ class T5BaselineDataset(Dataset):
 
     Args:
         keynames (List[str]): filenames without extension.
+        t5_tokenizer_prefix (str): tokenizer prefix.
+        format_labels_fn (callable): function for labels preprocessing
+        format_inputs_fn (callable): function for inputs preprocessing
         max_source_length (int): maximum length for toke sequences on encoder.
-        t5_tokenizer_prefix (str): tokenizer prefix. Defaults to `t5-small`.
-            Defaults to None (maximum model length, 512 on T5).
-        max_target_length (int): maximum length for toke sequences on decoder.
-            Defaults to None (maximum model length, 512 on T5).
-        format_labels_fn (callable): function that prepare labels for training.
-        format_inputs_fn (callable): function that prepares inputs for
-            training.
-        ocr_outputs (Dict[str, str]): dict mapping key name to raw OCR text
-            output.
-
+        max_target_length (int): maximum length for labels token sequences.
     """
     def __init__(
         self,
         keynames: List[str],
         format_labels_fn: callable,
         format_inputs_fn: callable,
-        t5_tokenizer_prefix: str = 't5-small',
+        t5_tokenizer_prefix: str,
         max_source_length: int = None,
         max_target_length: int = None,
     ):
@@ -99,35 +93,38 @@ class T5BaselineDataset(Dataset):
         return example
 
 
-def get_default_preprocessing_functions(field_to_extract):
-    """Convenience function for generating preprocessing functions for inputs
-        and labels when using T5 text-to-text.
+@gin.configurable
+def get_default_preprocessing_functions(
+        field_to_extract: str,
+        str_replace_newlines: str) -> Dict[str, callable]:
+    """Convenience functions for generating  preprocessing functions for labels
+        and inputs when using T5 text-to-text training.
 
-    For inputs, returns `What is the <x>? <formatted_text>`, where <x> is the
-    field to be extracted and <formatted_text> are the ocr outputs with `\n`
-    replace by blank spaces.
+    Args:
+        field_to_extract (str): field_to_extract
+        str_replace_newlines (str): string to replace `\n`
+        characters. Usually spaces (` `) or pipes (`|`).
 
-    For the labels, just return the ground truth labels.
+    Returns:
+        Dict[str, callable]: dict with two keys:
+            - `labels`: function that extracts the ground truth labels for the
+                desired field.
+            - `inputs`: Replaces `\n` on the ocr output text and prepends the
+                question: `What is the <field_to_extract?`
     """
     def format_labels_fn(x):
         return x[field_to_extract]
 
     def format_inputs_fn(x):
-        return f'What is the {field_to_extract}? ' + x.replace('\n', ' ')
+        return f'What is the {field_to_extract}? ' + x.replace(
+            '\n', str_replace_newlines)
 
     return {'inputs': format_inputs_fn, 'labels': format_labels_fn}
 
 
-DEFAULT_TASK_FUNCTION_MAPS = {
-    'extract_' + k: get_default_preprocessing_functions(k)
-    for k in SROIE_FIELDS_TO_EXTRACT
-}
-
-
 def get_datasets_dict_from_task_functions_map(
         keynames: List[str],
-        tasks_functions_maps: [List[Dict[str, callable]]
-                               ] = DEFAULT_TASK_FUNCTION_MAPS,
+        tasks_functions_maps: List[Dict[str, callable]],
         t5_prefix: str = 't5-small',
         max_source_length: Union[int, None] = 512,
         max_target_length: Union[int, None] = 64) -> Dict[str, Dataset]:

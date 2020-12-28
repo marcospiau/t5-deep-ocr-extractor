@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 import glob
 import json
 import os
@@ -55,3 +55,36 @@ def get_dataloaders_dict_from_datasets_dict(
         for k, v in datasets_dict.items()
     }
     return dataloaders
+
+
+def get_task_functions_maps(
+    base_function_generator_fn: callable,
+    fields_to_extract: Union[str, List[str]] = SROIE_FIELDS_TO_EXTRACT
+) -> Dict[str, [Dict[str, callable]]]:
+    """Get maps for preprocessing functions for each taskins, assuming that the
+        only differente is the field to be extracted.
+
+    Args:
+        base_function_generator_fn(callable): function that generates functions
+            for preprocessing inputs and labels. The only argument is the field
+            to be extracted.
+        fields_to_extract (List[str]): list of fields to be extracted.
+            Defaults to the 4 fields of SROIE task 3.
+
+    Returns:
+        Dict[str, [Doct[str, callable]]]: dict mapping tasks to preprocesing
+            functions.
+
+    """
+    if isinstance(fields_to_extract, list):
+        pass
+    elif isinstance(fields_to_extract, str):
+        fields_to_extract = [fields_to_extract]
+    else:
+        raise ValueError("fields_to_extract type must be `str` or `list`")
+
+    task_function_maps = {
+        'extract_' + k: base_function_generator_fn(k)
+        for k in fields_to_extract
+    }
+    return task_function_maps
