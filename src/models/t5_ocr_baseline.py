@@ -8,8 +8,9 @@ import numpy as np
 import pytorch_lightning as pl
 import random
 import torch
+import gin
 
-
+@gin.configurable
 class T5OCRBaseline(pl.LightningModule):
     def __init__(self, t5_model_prefix: str, t5_tokenizer_prefix: str,
                  learning_rate: float, optimizer: str,

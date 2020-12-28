@@ -7,4 +7,7 @@ setup(
     description='Final Projetct IA376J - SROIE Task 3`',
     author='marcospiau',
     license='MIT',
+    package_data={
+        '': ['*.gin'],
+    }
 )

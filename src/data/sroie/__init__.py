@@ -1,8 +1,9 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Callable
 import glob
 import json
 import os
 from torch.utils.data import Dataset, DataLoader
+import gin
 
 SROIE_FIELDS_TO_EXTRACT = ['address', 'date', 'total', 'company']
 
@@ -27,7 +28,7 @@ def load_full_ocr(key_path: str) -> dict:
     text_data = json.load(open(f'{key_path}.json', 'r'))
     return text_data
 
-
+@gin.configurable
 def get_all_keynames_from_dir(base_dir: str) -> List[str]:
     """Gets all keynames (filenames without extensions) from dir.
 
@@ -58,21 +59,21 @@ def get_dataloaders_dict_from_datasets_dict(
 
 
 def get_task_functions_maps(
-    base_function_generator_fn: callable,
+    base_function_generator_fn: Callable,
     fields_to_extract: Union[str, List[str]] = SROIE_FIELDS_TO_EXTRACT
-) -> Dict[str, [Dict[str, callable]]]:
+) -> Dict[str, Dict[str, Callable]]:
     """Get maps for preprocessing functions for each taskins, assuming that the
         only differente is the field to be extracted.
 
     Args:
-        base_function_generator_fn(callable): function that generates functions
+        base_function_generator_fn(Callable): function that generates functions
             for preprocessing inputs and labels. The only argument is the field
             to be extracted.
         fields_to_extract (List[str]): list of fields to be extracted.
             Defaults to the 4 fields of SROIE task 3.
 
     Returns:
-        Dict[str, [Doct[str, callable]]]: dict mapping tasks to preprocesing
+        Dict[str, Dict[str, Callable]]: dict mapping tasks to preprocesing
             functions.
 
     """
