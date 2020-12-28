@@ -125,9 +125,9 @@ def get_default_preprocessing_functions(
 def get_datasets_dict_from_task_functions_map(
         keynames: List[str],
         tasks_functions_maps: List[Dict[str, callable]],
-        t5_prefix: str = 't5-small',
-        max_source_length: Union[int, None] = 512,
-        max_target_length: Union[int, None] = 64) -> Dict[str, Dataset]:
+        t5_prefix: str,
+        max_source_length: int,
+        max_target_length: int) -> Dict[str, Dataset]:
     """Return dict with datasets for each individual task and one dataset with
         all tasks concatenated.
 
@@ -135,14 +135,10 @@ def get_datasets_dict_from_task_functions_map(
         keynames (List[str]): keynames (paths without extension) for receipts
             on SROIE dataset.
         t5_prefix (str, optional): prefix identifying the chosen t5 model.
-            Will be used to instantiate the tokenzier. Defaults to 't5-small'.
-        max_source_length (Union[int, None], optional): Length of input token
+            Will be used to instantiate the T5Tokenizer.
+        max_source_length (int): Length of input token
             sequences. Size is enforced with truncation or padding. Defaults to
-                64; None means size for model (512 for default
-                HuggingFace's T5 configs.
-        max_target_length (Union[int, None], optional): length of labels token
-            sequences. Defaults to 64. The observations in `max_source_length`
-            parameter are valid here too.
+        max_target_length (int): length of labels token sequences.
 
     Returns:
         Dict[str, Dataset]: dataset for each task.
