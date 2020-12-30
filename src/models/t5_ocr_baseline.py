@@ -156,8 +156,8 @@ class T5OCRBaseline(pl.LightningModule):
         #          on_epoch=False,
         #          on_step=True,
         #          logger=False) # Nao deixar esse logger=True porque da erro
-
-        if self.logger is not None:
+        # Only log if using NeptuneLogger
+        if callable(getattr(self.logger, 'experiment.log_metric', None)):
             self.logger.experiment.log_metric('train_loss_step', loss)
 
         # Acho que esse aqui vai dar problema o global_step so aumentar com

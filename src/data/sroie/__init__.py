@@ -57,13 +57,13 @@ def get_dataloaders_dict_from_datasets_dict(
     }
     return dataloaders
 
-
-def get_task_functions_maps(
+@gin.configurable
+def get_tasks_functions_maps(
     base_function_generator_fn: Callable,
     fields_to_extract: Union[str, List[str]] = SROIE_FIELDS_TO_EXTRACT
 ) -> Dict[str, Dict[str, Callable]]:
-    """Get maps for preprocessing functions for each taskins, assuming that the
-        only differente is the field to be extracted.
+    """Get maps for preprocessing functions for each task, assuming that the
+        only difference is the field to be extracted.
 
     Args:
         base_function_generator_fn(Callable): function that generates functions

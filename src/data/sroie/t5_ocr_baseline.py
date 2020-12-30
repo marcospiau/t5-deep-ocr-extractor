@@ -93,10 +93,10 @@ class T5BaselineDataset(Dataset):
         return example
 
 
-@gin.configurable
+@gin.configurable(allowlist=['str_replace_newlines'])
 def get_default_preprocessing_functions(
         field_to_extract: str,
-        str_replace_newlines: str) -> Dict[str, callable]:
+        str_replace_newlines: str = None) -> Dict[str, callable]:
     """Convenience functions for generating  preprocessing functions for labels
         and inputs when using T5 text-to-text training.
 
@@ -121,7 +121,7 @@ def get_default_preprocessing_functions(
 
     return {'inputs': format_inputs_fn, 'labels': format_labels_fn}
 
-
+@gin.configurable(denylist=['keynames'])
 def get_datasets_dict_from_task_functions_map(
         keynames: List[str],
         tasks_functions_maps: List[Dict[str, callable]],
