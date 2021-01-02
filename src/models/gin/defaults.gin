@@ -13,5 +13,5 @@ validation_sroie/data.sroie.get_all_keynames_from_dir.base_dir =  '/home/marcosp
 # trainer.checkpoint_callback = None
 # pl.Trainer.gpus = 1
 trainer.gpus = 1
-neptune_logger.project_name = "marcospiau/test-logs-until-ok"
-# neptune_logger.project_name = "final-project-ia376j-1"
+# neptune_logger.project_name = "marcospiau/test-logs-until-ok"
+neptune_logger.project_name = "final-project-ia376j-1"
