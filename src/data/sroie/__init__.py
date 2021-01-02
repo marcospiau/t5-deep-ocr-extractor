@@ -28,6 +28,7 @@ def load_full_ocr(key_path: str) -> dict:
     text_data = json.load(open(f'{key_path}.json', 'r'))
     return text_data
 
+
 @gin.configurable
 def get_all_keynames_from_dir(base_dir: str) -> List[str]:
     """Gets all keynames (filenames without extensions) from dir.
@@ -39,23 +40,26 @@ def get_all_keynames_from_dir(base_dir: str) -> List[str]:
     return keynames
 
 
+@gin.configurable
 def get_dataloaders_dict_from_datasets_dict(
-        datasets_dict: Dict[str, Dataset],
+        datasets_dict: Dict[str, Dataset], batch_size: int,
         dataloader_kwargs: dict) -> Dict[str, DataLoader]:
     """Generates dataloaders dict from datasets dict.
 
     Args:
-        datasets_dict (Dict[str, Dataset]): dict of dataxets
+        datasets_dict (Dict[str, Dataset]): dict of datasets.
+        batch_size (int): batch_size.
         dataloader_kwargs (dict): kwargs for dataloader initialization.
 
     Returns:
         Dict[str, DataLoader]: dict with dataloaders.
     """
     dataloaders = {
-        k: DataLoader(v, **dataloader_kwargs)
+        k: DataLoader(v, batch_size=batch_size, **dataloader_kwargs)
         for k, v in datasets_dict.items()
     }
     return dataloaders
+
 
 @gin.configurable
 def get_tasks_functions_maps(
