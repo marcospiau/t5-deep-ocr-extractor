@@ -122,11 +122,6 @@ class T5OCRBaseline(pl.LightningModule):
 
         print(buffer.getvalue())
         buffer.seek(0)
-        # if self.logger is not None:
-        #     self.logger.experiment.log_artifact(
-        #         buffer,
-        #         f'example_{prefix}_predictions_epoch={self.current_epoch}.txt'
-        #         )
 
         log_dict = {
             f"{prefix}_precision": precision_epoch,
@@ -139,7 +134,7 @@ class T5OCRBaseline(pl.LightningModule):
             prog_bar=True,
             on_epoch=True,
             on_step=False,
-            logger=True  # TODO testing
+            logger=True
         )
 
     def training_step(self, batch, batch_idx):
@@ -151,20 +146,10 @@ class T5OCRBaseline(pl.LightningModule):
                        attention_mask=attention_mask,
                        labels=labels,
                        return_dict=True).loss
-        # self.log('loss',
-        #          loss,
-        #          prog_bar=False,
-        #          on_epoch=False,
-        #          on_step=True,
-        #          logger=False) # Nao deixar esse logger=True porque da erro
-        # Only log if using NeptuneLogger
-        if callable(getattr(self.logger, 'experiment.log_metric', None)):
+        try:
             self.logger.experiment.log_metric('train_loss_step', loss)
-
-        # Acho que esse aqui vai dar problema o global_step so aumentar com
-        # o grad_batch_accum
-        # self.logger.experiment.log_metric('train_loss_manual_2',
-        #         self.global_step, loss)
+        except:
+            pass
         return loss
 
     def validation_step(self, batch, batch_idx):
