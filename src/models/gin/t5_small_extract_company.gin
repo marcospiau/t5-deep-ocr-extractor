@@ -23,11 +23,11 @@ get_datasets_dict_from_task_functions_map.max_source_length = 512
 get_datasets_dict_from_task_functions_map.max_target_length = 64
 
 # batch sizes
-# batch_size =  %T5_DEFAULT_BATCH_SIZES[%t5_prefix]
 get_dataloaders_dict_from_datasets_dict.batch_size = 32
-# trainer.accumulate_grad_batches = @get_accumulate_grad_batches(%T5_FINETUNING_BATCH_SIZE, %batch_size)
+
 trainer.accumulate_grad_batches = 4
-trainer.max_epochs = 3
+trainer.max_epochs = 2
+# trainer.min_epochs = 20
 early_stop.patience = 50
 
-neptune_logger.experiment_name = "tentando_rodar_com_gin"
+neptune_logger.experiment_name = "newlines_as_spaces_t5_default_finetune"
