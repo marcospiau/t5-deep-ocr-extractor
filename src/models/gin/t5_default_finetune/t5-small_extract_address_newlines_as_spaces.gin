@@ -26,7 +26,7 @@ trainer.accumulate_grad_batches = 4
 
 # epochs
 trainer.min_epochs = 20
-trainer.max_epochs = 100
+trainer.max_epochs = 200
 early_stop.patience = 50
 
 # neptune experiment name, same as .gin file

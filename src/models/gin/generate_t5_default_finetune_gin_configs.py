@@ -71,7 +71,7 @@ if __name__ == '__main__':
         format_dict.update({
             'patience': 50,
             'min_epochs': 20,
-            'max_epochs': 100,
+            'max_epochs': 200,
             'batch_size': batch_size,
             'batch_accum': batch_accum,
             'neptune_experiment_name': experiment_name
