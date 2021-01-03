@@ -138,7 +138,7 @@ def main(_):
         params_to_log['min_epochs'] = trainer.min_epochs
         params_to_log[
             'accumulate_grad_batches'] = trainer.accumulate_grad_batches
-        params_to_log['batch_size'] = train_dataloader[task_train].batch_size
+        params_to_log['batch_size'] = train_dataloaders[task_train].batch_size
 
         for k, v in params_to_log.items():
             logger.experiment.set_property(k, v)
