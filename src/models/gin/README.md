@@ -1,1 +1,1 @@
-Here are store configs used on all experiments.
+Here are stored configs used on all experiments.
