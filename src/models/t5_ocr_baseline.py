@@ -129,13 +129,11 @@ class T5OCRBaseline(pl.LightningModule):
             f"{prefix}_f1": f1_epoch,
             f"{prefix}_exact_match": exact_match_epoch
         }
-        self.log_dict(
-            log_dict,
-            prog_bar=True,
-            on_epoch=True,
-            on_step=False,
-            logger=True
-        )
+        self.log_dict(log_dict,
+                      prog_bar=True,
+                      on_epoch=True,
+                      on_step=False,
+                      logger=True)
 
     def training_step(self, batch, batch_idx):
         input_ids = batch['input_ids']
@@ -166,3 +164,17 @@ class T5OCRBaseline(pl.LightningModule):
     def test_epoch_end(self, outputs):
         self._base_eval_epoch_end(outputs, 'test')
         # return output
+
+    @torch.no_grad()
+    def predict(self, batch):
+        """Predicts a batch. Can be used on new data, since ground truth labels
+        are not required.
+
+        """
+        input_ids = batch['input_ids']
+
+        generated_tokens = self.t5.generate(
+            input_ids=input_ids, max_length=self.generate_max_length)
+        generated_text = self.decode_token_ids(generated_tokens)
+
+        return generated_text
