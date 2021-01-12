@@ -28,6 +28,11 @@ flags.DEFINE_boolean(
 flags.DEFINE_boolean(
     'upload_best_checkpoint', False,
     "If best model checkpoint should be uploaded to Neptune experiment")
+flags.DEFINE_boolean(
+        'best_model_run_mode', False,
+        "`Best model training`, all labelled data is used, the last checkpoint"
+        "is saved, not the best one."
+        )
 FLAGS = flags.FLAGS
 
 
@@ -74,7 +79,7 @@ def main(_):
             tags=[model.t5_model_prefix, task_train, 't5_ocr_baseline'])
         with gin.config_scope('sroie_t5_baseline'):
             checkpoint_callback = config_model_checkpoint(
-                monitor="val_f1",
+                monitor=None if FLAGS.best_model_run_mode else "val_f1",
                 dirpath=("/home/marcospiau/final_project_ia376j/checkpoints/"
                          f"{logger.project_name.replace('/', '_')}/"
                          "t5_ocr_baseline/"),
@@ -85,7 +90,7 @@ def main(_):
                 filename=("{step}-{epoch}-{val_precision:.6f}-{val_recall:.6f}"
                           "-{val_f1:.6f}-{val_exact_match:.6f}"),
                 mode="max",
-                save_top_k=1,
+                save_top_k=None if FLAGS.best_model_run_mode else 1,
                 verbose=True)
         early_stop_callback = config_early_stopping_callback()
         trainer_callbacks = [checkpoint_callback, early_stop_callback]
@@ -152,9 +157,11 @@ def main(_):
         trainer.logger.experiment.log_text(
             log_name='best_model_path',
             x=trainer.checkpoint_callback.best_model_path)
-        trainer.logger.experiment.log_metric(
-            'best_model_val_f1',
-            trainer.checkpoint_callback.best_model_score.item())
+        if not(FLAGS.best_model_run_mode):
+            trainer.logger.experiment.log_metric(
+                    'best_model_val_f1',
+                    trainer.checkpoint_callback.best_model_score.item()
+                    )
         if FLAGS.upload_best_checkpoint:
             trainer.logger.experiment.log_artifact(
                 trainer.checkpoint_callback.best_model_path)
