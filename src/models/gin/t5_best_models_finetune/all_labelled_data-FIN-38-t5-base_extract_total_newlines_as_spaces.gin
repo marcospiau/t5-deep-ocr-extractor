@@ -1,0 +1,33 @@
+#defaults
+include 'best_t5_models_defaults.gin'
+
+# Parameters used on T5 paper for finetuning
+T5OCRBaseline.optimizer = 'adafactor'
+T5OCRBaseline.learning_rate = 1e-3
+T5OCRBaseline.generate_max_length = 512
+
+# model size and task
+task_train/operative_macro.x = 'extract_total'
+t5_prefix = 't5-base'
+
+# model
+T5OCRBaseline.t5_model_prefix = %t5_prefix
+T5OCRBaseline.t5_tokenizer_prefix = %t5_prefix
+sroie_t5_baseline/get_default_preprocessing_functions.str_replace_newlines = ' '
+
+# dataset seq lengths
+get_datasets_dict_from_task_functions_map.t5_prefix = %t5_prefix
+get_datasets_dict_from_task_functions_map.max_source_length = 512
+get_datasets_dict_from_task_functions_map.max_target_length = 64
+
+# batch sizes
+get_dataloaders_dict_from_datasets_dict.batch_size = 8
+trainer.accumulate_grad_batches = 16
+
+# epochs
+trainer.min_epochs = 1
+trainer.max_epochs = 55
+early_stop.patience = 99999
+
+# neptune experiment name, same as .gin file
+neptune_logger.experiment_name = 'all_labelled_data-FIN-38-t5-base_extract_total_newlines_as_spaces'

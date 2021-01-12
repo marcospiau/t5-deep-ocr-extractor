@@ -1,0 +1,17 @@
+# Default preprocessing functions in QA text-to-text form.
+# String that replaces newlines must be specified
+sroie_t5_baseline/get_tasks_functions_maps.base_function_generator_fn = @get_default_preprocessing_functions
+
+
+# SROIE data location - All labeled data
+train_sroie/data.sroie.get_all_keynames_from_dir.base_dir = '/home/marcospiau/final_project_ia376j/data/sroie_receipt_dataset/all_labelled_data_for_final_models'
+validation_sroie/data.sroie.get_all_keynames_from_dir.base_dir =  '/home/marcospiau/final_project_ia376j/data/sroie_receipt_dataset/all_labelled_data_for_final_models/'
+
+
+# trainer default_args
+# trainer.logger = False
+# trainer.checkpoint_callback = None
+# pl.Trainer.gpus = 1
+trainer.gpus = 1
+# neptune_logger.project_name = "marcospiau/test-logs-until-ok"
+neptune_logger.project_name = "marcospiau/final-project-ia376j-1"
