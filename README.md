@@ -1,5 +1,7 @@
 # Projeto final IA376J - Desafio SROIE Task 3
 
+Todos os experimentos estão registrados no Neptune Logger, através desse [link](https://ui.neptune.ai/marcospiau/final-project-ia376j-1/experiments?viewId=7b690bc2-f1ea-499d-81f2-30a5c0208c04). Estão registrados os arquivos gin config (ver o repositório [gin-config](https://github.com/google/gin-config) para maiores informações.
+
 Abaixo um resumo de como o projeto está estruturado. Algumas seções possuem um README mais detalhado:
 
  ```
@@ -35,6 +37,5 @@ Abaixo um resumo de como o projeto está estruturado. Algumas seções possuem u
     |   |-- t5_ocr_baseline.py <<<< código módulo Pytorch Lightning do modelo
     |   `-- utils.py 
     `-- utils.py
-
-13 directories, 44 files
  ```
+
