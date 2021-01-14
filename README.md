@@ -15,6 +15,14 @@ Abaixo um resumo de como o projeto está estruturado. Algumas seções possuem u
 |-- setup.py
 `-- src
     |-- __init__.py
+    |-- data <<< códigos que tratam os dados
+    |   |-- __init__.py
+    |   |-- google_vision_ocr_extraction.py <<<< código para extração de OCR usando o Google Vision
+    |   |-- google_vision_ocr_parsing.py <<< parsing dos OCR gerados pelo Google Vision
+    |   `-- sroie
+    |       |-- __init__.py
+    |       `-- t5_ocr_baseline.py <<<< Pytorch Dataset usado nos modelos
+    |
     |-- evaluation <<<< códigos e scripts para avaliação dos modelos
     |   |-- __init__.py
     |   |-- save_experiment_predictions_t5_ocr_baseline.py <<<<< 
