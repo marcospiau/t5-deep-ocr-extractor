@@ -1,17 +1,22 @@
-# Final Project IA376J - SROIE Task 3 Challenge - Key Information Extraction from Scanned Receipts
+# t5-deep-ocr-extractor
 
-# Introduction
+## Introduction
 
-This repository contains code to solve the `Task 3 - Key Information Extraction from Scanned Receipts` from the `ICDAR 2019 Robust Reading Challenge on Scanned Receipts OCR and Information Extraction`. The complete description of the challenge and tasks can be found at [Tasks - ICDAR 2019 Robust Reading Challenge on Scanned Receipts OCR and Information Extraction](https://rrc.cvc.uab.es/?ch=13&com=tasks). This task aims to extract relevant fields [“address”, “company”, “total”, “date”] from scanned receipts. Our solution is based on extracting textual information from the images using Google Vision OCR, and then feeding a T5 model with this data to extract the relevant fields.
+This repository contains code to solve the `Task 3 - Key Information Extraction from Scanned Receipts` from the `ICDAR 2019 Robust Reading Challenge on Scanned Receipts OCR and Information Extraction`. A detailed description of the challenge and tasks can be found at [ICDAR 2019's official page](https://rrc.cvc.uab.es/?ch=13&com=tasks). The task consists of extracting specific information (`["address", "company", "total", "date"]`) from scanned receipts images.
+
+The core of our solution is to cast the problem into a text-to-text format, and then finetune T5 models to extract the fields by generating their contents.
+We use Google Vision OCR to extract textual data from the scanned images, and then use this data to feed the T5 models.
+
+This work was done as the final project for the course "Projects on Deep Learning for Images and NLP" during the second semester of 2020, under the guidance of professors Rodrigo Nogueira and Roberto Lotufo. 
 
 All experiments are logged on Neptune and can be found at this link [link](https://ui.neptune.ai/marcospiau/final-project-ia376j-1/experiments?viewId=7b690bc2-f1ea-499d-81f2-30a5c0208c04). Some key libraries used in the project are:
-* pytorch-lightning: for reducing pytorch boilerplate and configuring the training and evaluation loop
-* Hugging Face 🤗 transformers: for T5 models
-* gin-config: for experiment configuration
-* Neptune: for experiment tracking
+* `pytorch-lightning`: for reducing pytorch boilerplate and configuring the training and evaluation loop
+* `Hugging Face 🤗 transformers`: for T5 models
+* `gin-config`: for experiment configuration
+* `Neptune`: for experiment tracking
 
 
-# How this repository is structured
+## How this repository is structured
 ```
 .
 |-- LICENSE
