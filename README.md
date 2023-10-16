@@ -10,7 +10,7 @@ We use Google Vision OCR to extract textual data from the scanned images, and th
 This work was done as the final project for the course "Projects on Deep Learning for Images and NLP" during the second semester of 2020, under the guidance of professors Rodrigo Nogueira and Roberto Lotufo. 
 
 All experiments are logged on Neptune and can be found at this link [link](https://ui.neptune.ai/marcospiau/final-project-ia376j-1/experiments?viewId=7b690bc2-f1ea-499d-81f2-30a5c0208c04). Some key libraries used in the project are:
-* `pytorch-lightning`: for reducing pytorch boilerplate and configuring the training and evaluation loop
+* `pytorch-lightning`: for reducing PyTorch boilerplate and configuring the training and evaluation loop
 * `Hugging Face 🤗 transformers`: for T5 models
 * `gin-config`: for experiment configuration
 * `Neptune`: for experiment tracking
