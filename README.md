@@ -1,9 +1,8 @@
 # Projeto final IA376J - Desafio SROIE Task 3 - Key Information Extraction from Scanned Receipts
 
-Introdução
+# Introdução
 
 Este repositório contém código para solucionar a `Task 3 - Key Information Extraction from Scanned Receipts` do `ICDAR 2019 Robust Reading Challenge on Scanned Receipts OCR and Information Extraction`. A descrição completa do desafio e tarefas completas pode ser encontrada em [Tasks - ICDAR 2019 Robust Reading Challenge on Scanned Receipts OCR and Information Extraction](https://rrc.cvc.uab.es/?ch=13&com=tasks). Esta tarefa busca extrair campos relevantes [“address”, “company”, “total”, “date”] de receipts escaneados. Nossa solução é baseada em extrair informações textuais das imagens utilizando o Google Vision OCR, e então alimentar um modelo T5 com esses dados para extrair os campos relevantes.
-
 
 Todos os experimentos estão registrados no Neptune Logger, e podem ser consultados nesse link [link](https://ui.neptune.ai/marcospiau/final-project-ia376j-1/experiments?viewId=7b690bc2-f1ea-499d-81f2-30a5c0208c04). ALgumas bibliotecas importantes utilizadas no projeto são:
 * pytorch-lightning: redução de boilerplate pytorch e configuração do loop de treino e eval
